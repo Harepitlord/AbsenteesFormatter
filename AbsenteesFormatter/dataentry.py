@@ -63,7 +63,6 @@ class ManualEntry:
                 sq += "B{0}T{1} VARCHAR(10) NOT NULL,".format(b, h)
         sq += "B{0}T{1} VARCHAR(10) NOT NULL)".format(self.NoBatch, self.NoHour)
         sql += sq
-        print(sql,'\n')
 
         cur.execute(sql)
         con.commit()
@@ -84,7 +83,6 @@ class ManualEntry:
         sq += " VALUES (" + q + "?)"
         sql += sq
         c = 0
-        print(sql)
         for b in self.batch:
             data = tuple(reduce(add, b))
             cur.execute(sql, data)
