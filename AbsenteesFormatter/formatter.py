@@ -5,7 +5,7 @@ class Format:
     data = {}
     odname = []
     od = False
-    fstr = open("output.txt", "w")
+    fstr = open("../output.txt", "w")
 
     def __int__(self):
         self.LoadData()
