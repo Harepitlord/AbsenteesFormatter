@@ -2,16 +2,22 @@ import sqlite3
 
 
 class Format:
+    NoBatch = 0
+    NoHour = 0
     data = {}
     odname = []
     od = False
     fstr = open("../output.txt", "w")
 
-    def __int__(self):
+    def __int__(self,b,h):
         self.LoadData()
+        self.NoBatch = b
+        self.NoHour = h
         # self.fstr = open("output.txt", "w")
 
     def LoadData(self):
+        self.NoBatch = int(input('Enter No. of batches in the class : '))
+        self.NoHour = int(input('Enter No. of hours or periods per day : '))
         dat = input('Enter the date (dd/mm/yyyy) : ')
         self.data['dat'] = dat
         order = int(input('Enter day order : '))
@@ -38,16 +44,10 @@ class Format:
         if rows is None:
             print('Day Order Table is empty')
             return
-        batch1 = []
-        batch2 = []
-        for r in rows[0][1:5]:
-            batch1.append(r)
+        for b in range(self.NoBatch):
+            for r in rows[0][b*self.NoHour+1:(b+1)*self.NoHour +1]:
+                self.data['batch'+str(b+1)].append(r)
 
-        for r in rows[0][5:]:
-            batch2.append(r)
-
-        self.data['batch1'] = batch1
-        self.data['batch2'] = batch2
         return
 
     def NameFinder(self, noa, informed):
@@ -63,7 +63,8 @@ class Format:
                     self.fstr.write('20EUCB' + str(reg))
                 if informed:
                     self.fstr.write('    ' + self.data["student"][reg] + '  (informed)\n')
-                    self.odname.append(reg)
+                    if reg not in self.odname:
+                        self.odname.append(reg)
                 else:
                     self.fstr.write('    ' + self.data["student"][reg] + '  (uninformed)\n')
                 i += 1
@@ -94,10 +95,11 @@ class Format:
         if input('Anyone on OD: (y-True) ').lower() == 'y':
             self.od = True
         self.fstr.write('Date: ' + self.data['dat'] + '\nDay Order: ' + str(self.data['Order']))
-        for (a, b, c) in zip(self.data['batch1'], self.data["batch2"], range(1, 5)):
+        for c in range(1, self.NoHour+1):
             self.fstr.write('\nHour ' + str(c) + ' : ')
-            self.AbsenteesFinder(a, 1, c)
-            self.AbsenteesFinder(b, 2, c)
+            for b in range(1,self.NoBatch+1):
+                self.AbsenteesFinder(self.data['batch'+str(b)][c],b,c)
+
         if len(self.odname) > 0:
             self.fstr.write("\nOD: " + str(len(self.odname)) + "\n\n")
             for reg in self.odname:

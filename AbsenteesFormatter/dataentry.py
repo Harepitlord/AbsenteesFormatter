@@ -1,11 +1,17 @@
 import sqlite3
-
+from functools import reduce
+from operator import add
 
 class ManualEntry:
     name = []
     batch = [[[]]]
+    NoBatch = 0
+    NoHour = 0
 
     def Entry(self):
+
+        self.NoBatch = int(input('Enter No. of batches in the class : '))
+        self.NoHour = int(input('Enter No. of hours or periods per day : '))
 
         # Getting the student names from the user
         print("Data Entry Initiated....  Enter a number to stop ", flush=True)
@@ -46,13 +52,41 @@ class ManualEntry:
         con.commit()
 
         # Inserting class with respect to time slot into the database
-        sql = '''CREATE TABLE IF NOT EXISTS TIMETABLE(ORDERID INTEGER PRIMARY KEY AUTOINCREMENT,B1T1 VARCHAR(10) NOT 
-        NULL, B1T2 VARCHAR(10) NOT NULL, B1T3 VARCHAR(10) NOT NULL, B1T4 VARCHAR(10) NOT NULL,B2T1 VARCHAR(10) NOT 
-        NULL, B2T2 VARCHAR(10) NOT NULL, B2T3 VARCHAR(10) NOT NULL, B2T4 VARCHAR(10) NOT NULL) '''
+
+        #sql = '''CREATE TABLE IF NOT EXISTS TIMETABLE(ORDERID INTEGER PRIMARY KEY AUTOINCREMENT,B1T1 VARCHAR(10) NOT
+        #NULL, B1T2 VARCHAR(10) NOT NULL, B1T3 VARCHAR(10) NOT NULL, B1T4 VARCHAR(10) NOT NULL,B2T1 VARCHAR(10) NOT
+        #NULL, B2T2 VARCHAR(10) NOT NULL, B2T3 VARCHAR(10) NOT NULL, B2T4 VARCHAR(10) NOT NULL) '''
+        sql = "CREATE TABLE IF NOT EXISTS TIMETABLE(ORDERID INTEGER PRIMARY KEY AUTOINCREMENT,"
+        sq = ""
+        for b in range(1,self.NoBatch+1):
+            for h in range(1,self.NoHour):
+                sq += "B{0}T{1} VARCHAR(10) NOT NULL,".format(b,h)
+        sq += "B{0}T{1} VARCHAR(10) NOT NULL)".format(self.NoBatch,self.NoHour)
+        sql += sq
+
         cur.execute(sql)
-        for b in self.batch:
-            sql = '''INSERT INTO TIMETABLE(B1T1,B1T2,B1T3,B1T4,B2T1,B2T2,B2T3,B2T4) VALUES (?,?,?,?,?,?,?,?)'''
-            cur.execute(sql, (b[0][0], b[0][1], b[0][2], b[0][3], b[1][0], b[1][1], b[1][2], b[1][3],))
+
+        # for b in self.batch:
+        #     sql = '''INSERT INTO TIMETABLE(B1T1,B1T2,B1T3,B1T4,B2T1,B2T2,B2T3,B2T4) VALUES (?,?,?,?,?,?,?,?)'''
+        #     cur.execute(sql, (b[0][0], b[0][1], b[0][2], b[0][3], b[1][0], b[1][1], b[1][2], b[1][3],))
+        sql = "INSERT INTO TIMETABLE("
+        sq = ""
+        q = ""
+        for b in range(1,self.NoBatch+1):
+            for h in range(1,self.NoHour):
+                sq += "B{0}T{1},".format(b,h)
+                q += "?,"
+        sq += "B{0}T{1})".format(self.NoBatch, self.NoHour)
+        sq += " VALUES ("+q+"?)"
+        sql += sq
+        c = 0
+        for  b in self.batch:
+            data = tuple(reduce(add,b))
+            cur.execute(sql,data)
+            c += 1
+            if c == 5:
+                con.commit()
+
         con.commit()
         cur.close()
         return
