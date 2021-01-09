@@ -7,7 +7,7 @@ class Format:
     data = {}
     odname = []
     od = False
-    fstr = open("../output.txt", "w")
+    fstr = open("AbsenteesFormatter/output.txt", "w")
 
     def __int__(self,b,h):
         self.LoadData()
@@ -45,9 +45,10 @@ class Format:
             print('Day Order Table is empty')
             return
         for b in range(self.NoBatch):
+            dat = []
             for r in rows[0][b*self.NoHour+1:(b+1)*self.NoHour +1]:
-                self.data['batch'+str(b+1)].append(r)
-
+                dat.append(r)
+            self.data['batch' + str(b + 1)] = dat
         return
 
     def NameFinder(self, noa, informed):
@@ -98,7 +99,7 @@ class Format:
         for c in range(1, self.NoHour+1):
             self.fstr.write('\nHour ' + str(c) + ' : ')
             for b in range(1,self.NoBatch+1):
-                self.AbsenteesFinder(self.data['batch'+str(b)][c],b,c)
+                self.AbsenteesFinder(self.data['batch'+str(b)][c-1],b,c)
 
         if len(self.odname) > 0:
             self.fstr.write("\nOD: " + str(len(self.odname)) + "\n\n")

@@ -2,6 +2,7 @@ import sqlite3
 from functools import reduce
 from operator import add
 
+
 class ManualEntry:
     name = []
     batch = [[[]]]
@@ -9,9 +10,6 @@ class ManualEntry:
     NoHour = 0
 
     def Entry(self):
-
-        self.NoBatch = int(input('Enter No. of batches in the class : '))
-        self.NoHour = int(input('Enter No. of hours or periods per day : '))
 
         # Getting the student names from the user
         print("Data Entry Initiated....  Enter a number to stop ", flush=True)
@@ -23,15 +21,15 @@ class ManualEntry:
 
         # Getting Total number of day orders and batches, later class of the respective time slots
         torder = int(input('Enter the total no. of day orders: '))
-        tbatch = int(input('Enter total number of batches: '))
-        tclass = int(input('Enter no. of class per day: '))
+        self.NoBatch = int(input('Enter total number of batches: '))
+        self.NoHour = int(input('Enter no. of class per day: '))
         obatch = []
         for i in range(torder):
             bbatch = []
-            for j in range(tbatch):
+            for j in range(self.NoBatch):
                 print('Enter TimeTable of Batch' + str(j + 1) + ' day order ' + str(i + 1) + ' : ')
                 cbatch = []
-                for K in range(tclass):
+                for K in range(self.NoHour):
                     d = input('Enter class: ')
                     cbatch.append(d)
                 bbatch.append(cbatch)
@@ -41,7 +39,7 @@ class ManualEntry:
         return
 
     def intodb(self):
-        con = sqlite3.connect('datadb.sqlite')
+        con = sqlite3.connect('AbsenteesFormatter\datadb.sqlite')
         cur = con.cursor()
         # Inserting names into the database
         sql = '''CREATE TABLE IF NOT EXISTS STUDENTS(ID INTEGER PRIMARY KEY AUTOINCREMENT,NAME VARCHAR(128) NOT NULL)'''
@@ -53,18 +51,22 @@ class ManualEntry:
 
         # Inserting class with respect to time slot into the database
 
-        #sql = '''CREATE TABLE IF NOT EXISTS TIMETABLE(ORDERID INTEGER PRIMARY KEY AUTOINCREMENT,B1T1 VARCHAR(10) NOT
-        #NULL, B1T2 VARCHAR(10) NOT NULL, B1T3 VARCHAR(10) NOT NULL, B1T4 VARCHAR(10) NOT NULL,B2T1 VARCHAR(10) NOT
-        #NULL, B2T2 VARCHAR(10) NOT NULL, B2T3 VARCHAR(10) NOT NULL, B2T4 VARCHAR(10) NOT NULL) '''
+        # sql = '''CREATE TABLE IF NOT EXISTS TIMETABLE(ORDERID INTEGER PRIMARY KEY AUTOINCREMENT,B1T1 VARCHAR(10) NOT
+        # NULL, B1T2 VARCHAR(10) NOT NULL, B1T3 VARCHAR(10) NOT NULL, B1T4 VARCHAR(10) NOT NULL,B2T1 VARCHAR(10) NOT
+        # NULL, B2T2 VARCHAR(10) NOT NULL, B2T3 VARCHAR(10) NOT NULL, B2T4 VARCHAR(10) NOT NULL) '''
         sql = "CREATE TABLE IF NOT EXISTS TIMETABLE(ORDERID INTEGER PRIMARY KEY AUTOINCREMENT,"
         sq = ""
-        for b in range(1,self.NoBatch+1):
-            for h in range(1,self.NoHour):
-                sq += "B{0}T{1} VARCHAR(10) NOT NULL,".format(b,h)
-        sq += "B{0}T{1} VARCHAR(10) NOT NULL)".format(self.NoBatch,self.NoHour)
+        for b in range(1, self.NoBatch + 1):
+            for h in range(1, self.NoHour+1):
+                if b == self.NoBatch and h == self.NoHour:
+                    break
+                sq += "B{0}T{1} VARCHAR(10) NOT NULL,".format(b, h)
+        sq += "B{0}T{1} VARCHAR(10) NOT NULL)".format(self.NoBatch, self.NoHour)
         sql += sq
+        print(sql,'\n')
 
         cur.execute(sql)
+        con.commit()
 
         # for b in self.batch:
         #     sql = '''INSERT INTO TIMETABLE(B1T1,B1T2,B1T3,B1T4,B2T1,B2T2,B2T3,B2T4) VALUES (?,?,?,?,?,?,?,?)'''
@@ -72,19 +74,22 @@ class ManualEntry:
         sql = "INSERT INTO TIMETABLE("
         sq = ""
         q = ""
-        for b in range(1,self.NoBatch+1):
-            for h in range(1,self.NoHour):
-                sq += "B{0}T{1},".format(b,h)
+        for b in range(1, self.NoBatch + 1):
+            for h in range(1, self.NoHour+1):
+                if b == self.NoBatch and h == self.NoHour:
+                    break
+                sq += "B{0}T{1},".format(b, h)
                 q += "?,"
         sq += "B{0}T{1})".format(self.NoBatch, self.NoHour)
-        sq += " VALUES ("+q+"?)"
+        sq += " VALUES (" + q + "?)"
         sql += sq
         c = 0
-        for  b in self.batch:
-            data = tuple(reduce(add,b))
-            cur.execute(sql,data)
+        print(sql)
+        for b in self.batch:
+            data = tuple(reduce(add, b))
+            cur.execute(sql, data)
             c += 1
-            if c == 5:
+            if c == 1:
                 con.commit()
 
         con.commit()
