@@ -5,11 +5,13 @@ import time
 
 
 def main():
+    NoBatch = 2
+    NoHour = 4
     while True:
         print('Enter the choice : \n1.Data formatting\n2.Data entry\n3.Exit')
         choice = int(input())
         if choice == 1:
-            f = Format()
+            f = Format(NoBatch,NoHour)
             f.formatter()
         if choice == 2:
             d = ManualEntry()

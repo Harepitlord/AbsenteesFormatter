@@ -16,8 +16,7 @@ class Format:
         # self.fstr = open("output.txt", "w")
 
     def LoadData(self):
-        self.NoBatch = int(input('Enter No. of batches in the class : '))
-        self.NoHour = int(input('Enter No. of hours or periods per day : '))
+
         dat = input('Enter the date (dd/mm/yyyy) : ')
         self.data['dat'] = dat
         order = int(input('Enter day order : '))
